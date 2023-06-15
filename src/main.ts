@@ -18,7 +18,7 @@ async function run (): Promise<void> {
     const slackWebhookURL = getInput('slack_webhook_url')
     const inputPayload: SlackPayload = JSON.parse(getInput('payload'))
 
-    const payload = enrichPayload(inputPayload, org, repo, ref, sha, runId)
+    const payload = enrichPayload(inputPayload, org, repo, ref, runId)
     await sendSlackMessage(JSON.stringify(payload), slackWebhookURL)
   } catch (error) {
     if (error instanceof Error) setFailed(error.message)

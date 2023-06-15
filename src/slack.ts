@@ -28,7 +28,7 @@ export interface SlackPayload {
   blocks: SlackBlock[]
 }
 
-export const enrichPayload = (payload: SlackPayload, org: string, repo: string, ref: string, sha: string, runId: number): SlackPayload => {
+export const enrichPayload = (payload: SlackPayload, org: string, repo: string, ref: string, runId: number): SlackPayload => {
   const context: SlackBlock = {
     type: 'context',
     elements: [
@@ -42,7 +42,7 @@ export const enrichPayload = (payload: SlackPayload, org: string, repo: string, 
       },
       {
         type: 'plain_text',
-        text: `${sha} - ${runId}`
+        text: `build ${runId}`
       }
     ]
   }
