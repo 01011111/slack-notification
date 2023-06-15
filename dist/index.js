@@ -34,7 +34,7 @@ function run() {
             (0, core_1.debug)(`runId: ${runId}`);
             const slackWebhookURL = (0, core_1.getInput)('slack_webhook_url');
             const inputPayload = JSON.parse((0, core_1.getInput)('payload'));
-            const payload = (0, slack_1.enrichPayload)(inputPayload, org, repo, ref, sha, runId);
+            const payload = (0, slack_1.enrichPayload)(inputPayload, org, repo, ref, runId);
             yield (0, slack_1.sendSlackMessage)(JSON.stringify(payload), slackWebhookURL);
         }
         catch (error) {
@@ -69,7 +69,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.sendSlackMessage = exports.enrichPayload = void 0;
 const core_1 = __nccwpck_require__(2186);
 const node_fetch_1 = __importDefault(__nccwpck_require__(4429));
-const enrichPayload = (payload, org, repo, ref, sha, runId) => {
+const enrichPayload = (payload, org, repo, ref, runId) => {
     const context = {
         type: 'context',
         elements: [
@@ -83,7 +83,7 @@ const enrichPayload = (payload, org, repo, ref, sha, runId) => {
             },
             {
                 type: 'plain_text',
-                text: `${sha} - ${runId}`
+                text: `build ${runId}`
             }
         ]
     };
