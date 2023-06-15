@@ -11,7 +11,6 @@ inputs:
   slack_webhook_url:
     required: true
     description: The slack webhook url to send the payload to
-  success:
+  payload:
     required: true
-    description: Whether the action was successful or not
-    default: 'true'
+    description: The payload to send, JSON formatted - see https://api.slack.com/block-kit/building

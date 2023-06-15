@@ -24,48 +24,37 @@ interface SlackBlock {
   elements?: SlackElement[]
 }
 
-interface SlackPayload {
+export interface SlackPayload {
   blocks: SlackBlock[]
 }
 
-export const generatePayload = (org: string, repo: string, ref: string, sha: string, runId: number, success: boolean): SlackPayload => {
-  const payload = {
-    blocks: [
+export const enrichPayload = (payload: SlackPayload, org: string, repo: string, ref: string, sha: string, runId: number): SlackPayload => {
+  const context: SlackBlock = {
+    type: 'context',
+    elements: [
       {
-        type: 'section',
-        text: {
-          type: 'mrkdwn',
-          text: success ? `${repo} ${ref} deployment was successful :rocket:` : `${repo} ${ref} deployment failed :x:`
-        },
-        accessory: {
-          type: 'button',
-          text: {
-            type: 'plain_text',
-            text: 'Workflow'
-          },
-          value: `workflow_${runId}}`,
-          url: `https://github.com/${org}/${repo}/actions/runs/${runId}`
-        }
+        type: 'plain_text',
+        text: `${org}/${repo}`
       },
       {
-        type: 'context',
-        elements: [
-          {
-            type: 'plain_text',
-            text: repo
-          },
-          {
-            type: 'plain_text',
-            text: ref
-          },
-          {
-            type: 'plain_text',
-            text: sha
-          }
-        ]
+        type: 'plain_text',
+        text: ref
+      },
+      {
+        type: 'plain_text',
+        text: `${sha} - ${runId}`
       }
     ]
   }
+
+  const contextIndex: number = payload.blocks.findIndex(block => block.type === 'context')
+
+  if (contextIndex === -1) {
+    payload.blocks.push(context)
+  } else {
+    payload.blocks[contextIndex] = context
+  }
+
   return payload
 }
 

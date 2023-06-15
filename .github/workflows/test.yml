@@ -26,10 +26,10 @@ jobs:
         if: success()
         with:
           slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
-          success: 'true'
+          payload: '{"blocks":[{"type":"section","text":{"type":"mrkdwn","text":":shipit: *Success!*"}}]}'
       
       - uses: ./
         if: failure()
         with:
           slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
-          success: 'false'
+          payload: '{"blocks":[{"type":"section","text":{"type":"mrkdwn","text":":scream: _Uh Oh_"}}]}'

@@ -1,6 +1,6 @@
 import { getInput, debug, setFailed } from '@actions/core'
 import { context } from '@actions/github'
-import { generatePayload, sendSlackMessage } from './slack'
+import { type SlackPayload, enrichPayload, sendSlackMessage } from './slack'
 
 async function run (): Promise<void> {
   try {
@@ -15,11 +15,10 @@ async function run (): Promise<void> {
     debug(`sha: ${sha}`)
     debug(`runId: ${runId}`)
 
-    const success = getInput('success') === 'true'
-
     const slackWebhookURL = getInput('slack_webhook_url')
+    const inputPayload: SlackPayload = JSON.parse(getInput('payload'))
 
-    const payload = generatePayload(org, repo, ref, sha, runId, success)
+    const payload = enrichPayload(inputPayload, org, repo, ref, sha, runId)
     await sendSlackMessage(JSON.stringify(payload), slackWebhookURL)
   } catch (error) {
     if (error instanceof Error) setFailed(error.message)

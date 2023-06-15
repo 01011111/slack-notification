@@ -32,9 +32,9 @@ function run() {
             (0, core_1.debug)(`ref: ${ref}`);
             (0, core_1.debug)(`sha: ${sha}`);
             (0, core_1.debug)(`runId: ${runId}`);
-            const success = (0, core_1.getInput)('success') === 'true';
             const slackWebhookURL = (0, core_1.getInput)('slack_webhook_url');
-            const payload = (0, slack_1.generatePayload)(org, repo, ref, sha, runId, success);
+            const inputPayload = JSON.parse((0, core_1.getInput)('payload'));
+            const payload = (0, slack_1.enrichPayload)(inputPayload, org, repo, ref, sha, runId);
             yield (0, slack_1.sendSlackMessage)(JSON.stringify(payload), slackWebhookURL);
         }
         catch (error) {
@@ -66,50 +66,37 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.sendSlackMessage = exports.generatePayload = void 0;
+exports.sendSlackMessage = exports.enrichPayload = void 0;
 const core_1 = __nccwpck_require__(2186);
 const node_fetch_1 = __importDefault(__nccwpck_require__(4429));
-const generatePayload = (org, repo, ref, sha, runId, success) => {
-    const payload = {
-        blocks: [
+const enrichPayload = (payload, org, repo, ref, sha, runId) => {
+    const context = {
+        type: 'context',
+        elements: [
             {
-                type: 'section',
-                text: {
-                    type: 'mrkdwn',
-                    text: success ? `${repo} ${ref} deployment was successful :rocket:` : `${repo} ${ref} deployment failed :x:`
-                },
-                accessory: {
-                    type: 'button',
-                    text: {
-                        type: 'plain_text',
-                        text: 'Workflow'
-                    },
-                    value: `workflow_${runId}}`,
-                    url: `https://github.com/${org}/${repo}/actions/runs/${runId}`
-                }
+                type: 'plain_text',
+                text: `${org}/${repo}`
             },
             {
-                type: 'context',
-                elements: [
-                    {
-                        type: 'plain_text',
-                        text: repo
-                    },
-                    {
-                        type: 'plain_text',
-                        text: ref
-                    },
-                    {
-                        type: 'plain_text',
-                        text: sha
-                    }
-                ]
+                type: 'plain_text',
+                text: ref
+            },
+            {
+                type: 'plain_text',
+                text: `${sha} - ${runId}`
             }
         ]
     };
+    const contextIndex = payload.blocks.findIndex(block => block.type === 'context');
+    if (contextIndex === -1) {
+        payload.blocks.push(context);
+    }
+    else {
+        payload.blocks[contextIndex] = context;
+    }
     return payload;
 };
-exports.generatePayload = generatePayload;
+exports.enrichPayload = enrichPayload;
 const sendSlackMessage = (payload, slackWebhookURL) => __awaiter(void 0, void 0, void 0, function* () {
     (0, core_1.debug)(`payload: ${payload}`);
     yield (0, node_fetch_1.default)(slackWebhookURL, {
